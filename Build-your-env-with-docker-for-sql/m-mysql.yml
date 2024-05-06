@@ -1,0 +1,42 @@
+version: '3.7'
+
+services:
+
+  mysql-db:
+    image: mysql:latest
+    container_name: mysql-db
+    hostname: mysql-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: "password"
+    ports:
+      - 3306:3306
+    volumes:
+      - ./mysql-data:/var/lib/mysql
+
+  mysql-workbench:
+    image: linuxserver/mysql-workbench:latest
+    container_name: mysql-workbench
+    restart: unless-stopped
+    environment:
+      - PUID=1000
+      - PGID=1000
+    ports:
+      - 3000:3000
+
+  jupyter:
+    image: jupyter/datascience-notebook
+    container_name: jupyter
+    restart: unless-stopped
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=password
+      - MYSQL_HOST=mysql-db
+      - MYSQL_PORT=3306
+    ports:
+      - 8888:8888
+    volumes:
+      - ./jupyter-notebooks:/home/jovyan/work
+    depends_on:
+      - mysql-db
